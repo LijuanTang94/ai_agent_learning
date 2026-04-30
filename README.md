@@ -10,7 +10,8 @@ This repository documents my hands-on learning path for building AI agents, from
 
 ## Current Progress
 
-- [x] Built a basic chatbot in `projects/chatbot/chatbot.py`
+- [x] Built a basic chatbot in `projects/chatbot/v1-basic/chatbot.py`
+- [x] Built a tool-calling chatbot in `projects/chatbot/v2-tool-callinig/chatbot.py`
 - [ ] Add streaming response support
 - [ ] Compare workflow-based systems vs agent-based systems
 - [ ] Build a coding agent prototype
@@ -34,9 +35,14 @@ This repository documents my hands-on learning path for building AI agents, from
 
 ```text
 ai_agent_learning/
+├── .gitignore
 ├── projects/
 │   └── chatbot/
-│       └── chatbot.py
+│       ├── README.md
+│       ├── v1-basic/
+│       │   └── chatbot.py
+│       └── v2-tool-callinig/
+│           └── chatbot.py
 └── README.md
 ```
 
@@ -60,7 +66,13 @@ pip install openai python-dotenv
 ### 3) Run
 
 ```bash
-python projects/chatbot/chatbot.py
+python projects/chatbot/v1-basic/chatbot.py
+```
+
+Or run the tool-calling version:
+
+```bash
+python projects/chatbot/v2-tool-callinig/chatbot.py
 ```
 
 Type `exit`, `quit`, or `bye` to stop.
@@ -68,6 +80,7 @@ Type `exit`, `quit`, or `bye` to stop.
 ## Notes
 
 - This is a learning-focused repository, so code and notes will evolve continuously.
+- Module sections track learning milestones, while `v1/v2/...` folders track implementation iterations within a single project.
 - Each module will be expanded with:
   - runnable demos
   - implementation notes
@@ -77,7 +90,7 @@ Type `exit`, `quit`, or `bye` to stop.
 
 ### What I built
 
-- Implemented a CLI chatbot in `projects/chatbot/chatbot.py`.
+- Implemented a CLI chatbot in `projects/chatbot/v1-basic/chatbot.py`.
 - Loaded API credentials from `.env` using `python-dotenv`.
 - Sent chat history (`messages`) to the model for multi-turn context.
 - Added a system prompt to control assistant persona and tone.
@@ -89,3 +102,20 @@ Type `exit`, `quit`, or `bye` to stop.
 - The system prompt strongly influences output style and role behavior.
 - Keeping conversation history is the foundation of context-aware interaction.
 - Environment variables are required for safer local development.
+
+## Module 02 - Tool Calling Chatbot
+
+### What I built
+
+- Implemented a tool-calling chatbot in `projects/chatbot/v2-tool-callinig/chatbot.py`.
+- Added a function tool schema (`get_weather`) to the chat completion request.
+- Parsed tool arguments from model-generated tool calls.
+- Executed local Python functions and appended tool outputs back to messages.
+- Triggered a follow-up model response after tool execution.
+
+### What I learned
+
+- Tool calling requires clear function schemas with strict parameter definitions.
+- The assistant-tool-assistant loop is essential for turning tool output into final answers.
+- Message ordering matters: user message, assistant tool call, tool result, final assistant reply.
+- Tool outputs should be structured and predictable to reduce model confusion.
