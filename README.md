@@ -11,10 +11,10 @@ This repository documents my hands-on learning path for building AI agents, from
 ## Current Progress
 
 - [x] Built a basic chatbot in `projects/chatbot/v1-basic/chatbot.py`
-- [x] Built a tool-calling chatbot in `projects/chatbot/v2-tool-callinig/chatbot.py`
-- [ ] Add streaming response support
+- [x] Built a tool-calling chatbot in `projects/chatbot/v2-tool-calling/chatbot.py`
+- [x] Built a coding agent in `projects/codingAgent/agent.py`
+- [x] Added streaming chat in `projects/chatbot/v3-streaming-chat/streaming_chat.py`
 - [ ] Compare workflow-based systems vs agent-based systems
-- [ ] Build a coding agent prototype
 - [ ] Build and test an MCP tool
 - [ ] Analyze MCP communication protocol
 - [ ] Customize AI workflow with Skills
@@ -37,12 +37,19 @@ This repository documents my hands-on learning path for building AI agents, from
 ai_agent_learning/
 ├── .gitignore
 ├── projects/
-│   └── chatbot/
+│   ├── chatbot/
+│   │   ├── README.md
+│   │   ├── v1-basic/
+│   │   │   └── chatbot.py
+│   │   ├── v2-tool-calling/
+│   │   │   └── chatbot.py
+│   │   └── v3-streaming-chat/
+│   │       └── streaming_chat.py
+│   └── codingAgent/
 │       ├── README.md
-│       ├── v1-basic/
-│       │   └── chatbot.py
-│       └── v2-tool-callinig/
-│           └── chatbot.py
+│       ├── agent.py
+│       ├── fib.py
+│       └── buggy.py
 └── README.md
 ```
 
@@ -72,10 +79,25 @@ python projects/chatbot/v1-basic/chatbot.py
 Or run the tool-calling version:
 
 ```bash
-python projects/chatbot/v2-tool-callinig/chatbot.py
+python projects/chatbot/v2-tool-calling/chatbot.py
 ```
 
-Type `exit`, `quit`, or `bye` to stop.
+Streaming (token-by-token output):
+
+```bash
+python projects/chatbot/v3-streaming-chat/streaming_chat.py
+```
+
+Type `exit`, `quit`, or `bye` to stop (v1, v2, v3).
+
+### Coding Agent
+
+```bash
+cd projects/codingAgent
+python agent.py
+```
+
+Exit with `q`, `exit`, `quit`, or `bye`. Run from `codingAgent/` so file paths in tasks match the tutorial.
 
 ## Notes
 
@@ -107,7 +129,7 @@ Type `exit`, `quit`, or `bye` to stop.
 
 ### What I built
 
-- Implemented a tool-calling chatbot in `projects/chatbot/v2-tool-callinig/chatbot.py`.
+- Implemented a tool-calling chatbot in `projects/chatbot/v2-tool-calling/chatbot.py`.
 - Added a function tool schema (`get_weather`) to the chat completion request.
 - Parsed tool arguments from model-generated tool calls.
 - Executed local Python functions and appended tool outputs back to messages.
@@ -119,3 +141,31 @@ Type `exit`, `quit`, or `bye` to stop.
 - The assistant-tool-assistant loop is essential for turning tool output into final answers.
 - Message ordering matters: user message, assistant tool call, tool result, final assistant reply.
 - Tool outputs should be structured and predictable to reduce model confusion.
+
+## Module 03 - Coding Agent (tool loop)
+
+### What I built
+
+- Implemented `projects/codingAgent/agent.py` with tools: `read_file`, `write_file`, `run_command`.
+- Inner `while True` agent loop so the model can chain multiple tool steps before the final reply.
+- Used `extra_body` with `reasoning_effort` for step-by-step decisions (per course notes).
+- Practice targets: `fib.py` (generate and test) and `buggy.py` (read, fix, verify).
+
+### What I learned
+
+- Chatbot-style “one tool round then answer” hits a ceiling; an agent loop removes that cap.
+- Ordering still matters: assistant (with `tool_calls`) must precede each `tool` message in `messages`.
+- Long sessions with reasoning enabled can require careful message replay or a fresh process; production agents add limits, retries, and context management.
+
+## Module 04 - Streaming completions
+
+### What I built
+
+- Implemented `projects/chatbot/v3-streaming-chat/streaming_chat.py` with `stream=True` on `chat.completions.create`.
+- Printed each `delta.content` chunk as it arrives, then concatenated into `full_reply` for `messages` history.
+
+### What I learned
+
+- Streaming improves perceived latency: the user sees output before the model finishes the whole answer.
+- Client code must still accumulate tokens into one string if the next turn needs a full assistant message in `messages`.
+- Provider options (e.g. `extra_body` / thinking) behave the same streaming vs non-streaming; only the response shape is chunked.
