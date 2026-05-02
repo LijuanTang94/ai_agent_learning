@@ -14,7 +14,7 @@ This repository documents my hands-on learning path for building AI agents, from
 - [x] Built a tool-calling chatbot in `projects/chatbot/v2-tool-calling/chatbot.py`
 - [x] Built a coding agent in `projects/codingAgent/agent.py`
 - [x] Added streaming chat in `projects/chatbot/v3-streaming-chat/streaming_chat.py`
-- [ ] Compare workflow-based systems vs agent-based systems
+- [x] Added workflow-style demo in `projects/workflow_vs_agent/daily_report.py`
 - [ ] Build and test an MCP tool
 - [ ] Analyze MCP communication protocol
 - [ ] Customize AI workflow with Skills
@@ -45,11 +45,15 @@ ai_agent_learning/
 │   │   │   └── chatbot.py
 │   │   └── v3-streaming-chat/
 │   │       └── streaming_chat.py
-│   └── codingAgent/
+│   ├── codingAgent/
+│   │   ├── README.md
+│   │   ├── agent.py
+│   │   ├── fib.py
+│   │   └── buggy.py
+│   └── workflow_vs_agent/
 │       ├── README.md
-│       ├── agent.py
-│       ├── fib.py
-│       └── buggy.py
+│       ├── daily_report.py
+│       └── daily_report_prefect.py
 └── README.md
 ```
 
@@ -67,7 +71,7 @@ BASE_URL=your_model_base_url
 ### 2) Install dependencies
 
 ```bash
-pip install openai python-dotenv
+pip install openai python-dotenv requests beautifulsoup4 prefect
 ```
 
 ### 3) Run
@@ -98,6 +102,16 @@ python agent.py
 ```
 
 Exit with `q`, `exit`, `quit`, or `bye`. Run from `codingAgent/` so file paths in tasks match the tutorial.
+
+### Workflow demo (GitHub Trending daily report)
+
+```bash
+cd projects/workflow_vs_agent
+python daily_report.py
+python daily_report_prefect.py
+```
+
+Writes `trending_report_YYYY-MM-DD.md` in that folder (gitignored by default).
 
 ## Notes
 
@@ -169,3 +183,17 @@ Exit with `q`, `exit`, `quit`, or `bye`. Run from `codingAgent/` so file paths i
 - Streaming improves perceived latency: the user sees output before the model finishes the whole answer.
 - Client code must still accumulate tokens into one string if the next turn needs a full assistant message in `messages`.
 - Provider options (e.g. `extra_body` / thinking) behave the same streaming vs non-streaming; only the response shape is chunked.
+
+## Module 05 - Workflow-style pipeline (vs agent loop)
+
+### What I built
+
+- Implemented `projects/workflow_vs_agent/daily_report.py`: fetch GitHub Trending HTML, parse repository rows with BeautifulSoup, take the top entries, call the chat API for an English summary, save a dated Markdown report.
+- Added `projects/workflow_vs_agent/daily_report_prefect.py` to express the same workflow with Prefect `@task` / `@flow` orchestration and retries.
+
+### What I learned
+
+- A **workflow** runs a fixed sequence (fetch → transform → LLM → write); an **agent** lets the model choose tools and iterate until done.
+- Workflows are simpler to reason about and debug; agents trade that for flexibility on messy tasks.
+- Workflow frameworks like Prefect make retries and execution structure explicit without changing the business logic.
+- Scraping public pages is brittle (markup changes); production systems prefer stable APIs or cached feeds.

@@ -1,2 +1,4 @@
-.env
 .env.*
+.env
+# Generated workflow output (daily GitHub trending summaries)
+**/trending_report_*.md
