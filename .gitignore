@@ -1,4 +1,14 @@
 .env.*
 .env
+
+# OS / editor
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+
 # Generated workflow output (daily GitHub trending summaries)
 **/trending_report_*.md
