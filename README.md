@@ -15,8 +15,8 @@ This repository documents my hands-on learning path for building AI agents, from
 - [x] Built a coding agent in `projects/codingAgent/agent.py`
 - [x] Added streaming chat in `projects/chatbot/v3-streaming-chat/streaming_chat.py`
 - [x] Added workflow-style demo in `projects/workflow_vs_agent/daily_report.py`
-- [ ] Build and test an MCP tool
-- [ ] Analyze MCP communication protocol
+- [x] Added GitHub MCP examples in `github-mcp/` (`server.py`, `agent_mcp.py`; see `github-mcp/README.md`)
+- [ ] Analyze MCP communication protocol (notes / deeper dive)
 - [ ] Customize AI workflow with Skills
 - [ ] Explore advanced traffic/debugging tools
 
@@ -36,6 +36,11 @@ This repository documents my hands-on learning path for building AI agents, from
 ```text
 ai_agent_learning/
 ├── .gitignore
+├── github-mcp/
+│   ├── README.md
+│   ├── server.py
+│   ├── agent_mcp.py
+│   └── pyproject.toml
 ├── projects/
 │   ├── chatbot/
 │   │   ├── README.md
@@ -112,6 +117,19 @@ python daily_report_prefect.py
 ```
 
 Writes `trending_report_YYYY-MM-DD.md` in that folder (gitignored by default).
+
+### GitHub MCP (`github-mcp/`)
+
+Use **`uv`** in that folder (keeps dependencies in `github-mcp/.venv`; see `github-mcp/README.md`):
+
+```bash
+cd github-mcp
+uv sync
+uv run python server.py
+# or: uv run python agent_mcp.py
+```
+
+Optional: `GITHUB_TOKEN` in `.env` for higher GitHub API rate limits (documented in `github-mcp/README.md`).
 
 ## Notes
 
@@ -197,3 +215,16 @@ Writes `trending_report_YYYY-MM-DD.md` in that folder (gitignored by default).
 - Workflows are simpler to reason about and debug; agents trade that for flexibility on messy tasks.
 - Workflow frameworks like Prefect make retries and execution structure explicit without changing the business logic.
 - Scraping public pages is brittle (markup changes); production systems prefer stable APIs or cached feeds.
+
+## Module 06 - MCP: GitHub tools + LLM client
+
+### What I built
+
+- `github-mcp/server.py`: FastMCP stdio server exposing GitHub REST helpers as MCP tools.
+- `github-mcp/agent_mcp.py`: spawns the server as a subprocess, lists tools, and runs the same “agent loop” pattern (LLM `tool_calls` → `call_tool` → follow-up).
+
+### What I learned
+
+- MCP splits **tool implementation** (server) from **orchestration** (client / LLM); stdio is the default local transport.
+- The client must map MCP `inputSchema` to OpenAI-style `parameters`, and keep **spawn paths** and **`uv run python …`** correct or the child server never starts.
+- Optional tokens (`GITHUB_TOKEN`) and LLM keys stay in `.env` (gitignored), not in source.
